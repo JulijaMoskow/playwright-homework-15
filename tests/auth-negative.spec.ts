@@ -14,7 +14,7 @@ test.describe('Auth negative tests', () => {
     });
 
     test('button should stay disabled when only login is filled', async ({ page }) => {
-        const loginInput = page.locator('input[name="login"]');
+        const loginInput = page.getByRole('textbox').first();
         const signInButton = page.getByRole('button', { name: /sign in/i });
 
         const randomUsername = faker.internet.username();
@@ -25,8 +25,8 @@ test.describe('Auth negative tests', () => {
     });
 
     test('button should stay disabled when password is invalid', async ({ page }) => {
-        const loginInput = page.locator('input[name="login"]');
-        const passwordInput = page.locator('input[name="password"]');
+        const loginInput = page.getByRole('textbox').first();
+        const passwordInput = page.locator('input[type="password"]');
         const signInButton = page.getByRole('button', { name: /sign in/i });
 
         const randomUsername = faker.internet.username();
