@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 
 test.describe('Auth negative tests', () => {
     test.beforeEach(async ({ page }) => {
@@ -16,7 +17,9 @@ test.describe('Auth negative tests', () => {
         const loginInput = page.getByPlaceholder('Login');
         const signInButton = page.getByRole('button', { name: 'Sign in' });
 
-        await loginInput.fill('testuser');
+        const randomUsername = faker.internet.username();
+
+        await loginInput.fill(randomUsername);
 
         await expect(signInButton).toBeDisabled();
     });
@@ -26,8 +29,11 @@ test.describe('Auth negative tests', () => {
         const passwordInput = page.getByPlaceholder('Password');
         const signInButton = page.getByRole('button', { name: 'Sign in' });
 
-        await loginInput.fill('testuser');
-        await passwordInput.fill('123');
+        const randomUsername = faker.internet.username();
+        const randomPassword = faker.internet.password({ length: 3 });
+
+        await loginInput.fill(randomUsername);
+        await passwordInput.fill(randomPassword);
 
         await expect(signInButton).toBeDisabled();
     });
