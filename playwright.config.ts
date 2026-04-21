@@ -1,40 +1,26 @@
-import { test, expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
+import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
 
-test.describe('Auth negative tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/signin');
-  });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-  test('button should be disabled when both fields are empty', async ({ page }) => {
-    const signInButton = page.getByRole('button', { name: 'Sign in' });
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
 
-    await signInButton.click();
-    await expect(page).toHaveURL(/signin/);
-  });
+  use: {
+    baseURL: process.env.APP_URL,
+    trace: 'on-first-retry',
+  },
 
-  test('button should stay disabled when only login is filled', async ({ page }) => {
-    const loginInput = page.getByPlaceholder('Login');
-    const signInButton = page.getByRole('button', { name: 'Sign in' });
-
-    const randomUsername = faker.internet.username();
-
-    await loginInput.fill(randomUsername);
-
-    await expect(signInButton).toBeDisabled();
-  });
-
-  test('button should stay disabled when password is invalid', async ({ page }) => {
-    const loginInput = page.getByPlaceholder('Login');
-    const passwordInput = page.getByPlaceholder('Password');
-    const signInButton = page.getByRole('button', { name: 'Sign in' });
-
-    const randomUsername = faker.internet.username();
-    const randomPassword = faker.internet.password({ length: 3 });
-
-    await loginInput.fill(randomUsername);
-    await passwordInput.fill(randomPassword);
-
-    await expect(signInButton).toBeDisabled();
-  });
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
 });
