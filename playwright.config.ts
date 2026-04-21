@@ -1,64 +1,40 @@
-import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { test, expect } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+test.describe('Auth negative tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/signin');
+  });
 
-export default defineConfig({
-  testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  test('button should be disabled when both fields are empty', async ({ page }) => {
+    const signInButton = page.getByRole('button', { name: 'Sign in' });
 
-  use: {
-    baseURL: process.env.APP_URL,
-    trace: 'on-first-retry',
-  },
+    await signInButton.click();
+    await expect(page).toHaveURL(/signin/);
+  });
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
-});
-   // {
-    //  name: 'firefox',
-    //  use: { ...devices['Desktop Firefox'] },
-    //},
+  test('button should stay disabled when only login is filled', async ({ page }) => {
+    const loginInput = page.getByPlaceholder('Login');
+    const signInButton = page.getByRole('button', { name: 'Sign in' });
 
-    //{
-     // name: 'webkit',
-     // use: { ...devices['Desktop Safari'] },
-    //},
+    const randomUsername = faker.internet.username();
 
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    await loginInput.fill(randomUsername);
 
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
-  ],
+    await expect(signInButton).toBeDisabled();
+  });
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  test('button should stay disabled when password is invalid', async ({ page }) => {
+    const loginInput = page.getByPlaceholder('Login');
+    const passwordInput = page.getByPlaceholder('Password');
+    const signInButton = page.getByRole('button', { name: 'Sign in' });
+
+    const randomUsername = faker.internet.username();
+    const randomPassword = faker.internet.password({ length: 3 });
+
+    await loginInput.fill(randomUsername);
+    await passwordInput.fill(randomPassword);
+
+    await expect(signInButton).toBeDisabled();
+  });
 });
